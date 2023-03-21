@@ -1,9 +1,9 @@
 package com.example.androidfundementalsection2
 
 class CuboidModel {
-    private var width = 0.0
-    private var length = 0.0
-    private var height = 0.0
+    var width = 0.0
+    var length = 0.0
+    var height = 0.0
     fun getVolume(): Double = width * length * height
     fun getSurfaceArea(): Double {
         val wl = width * length

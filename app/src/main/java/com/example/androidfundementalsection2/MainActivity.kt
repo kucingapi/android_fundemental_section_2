@@ -3,12 +3,16 @@ package com.example.androidfundementalsection2
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.example.androidfundementalsection2.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), View.OnClickListener  {
     private lateinit var activityMainBinding: ActivityMainBinding
     private lateinit var mainViewModel: MainViewModel
+    private lateinit var cuboidPreference: CuboidPreference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,10 +22,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener  {
 
         mainViewModel = MainViewModel(CuboidModel())
 
+        cuboidPreference = CuboidPreference(this)
         activityMainBinding.btnSave.setOnClickListener(this)
         activityMainBinding.btnCalculateSurfaceArea.setOnClickListener(this)
         activityMainBinding.btnCalculateCircumference.setOnClickListener(this)
         activityMainBinding.btnCalculateVolume.setOnClickListener(this)
+        activityMainBinding.btnSaveFile.setOnClickListener(this)
     }
 
     override fun onClick(v: View) {
@@ -43,8 +49,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener  {
                 val valueWidth = width.toDouble()
                 val valueHeight = height.toDouble()
                 when (v.id) {
+                    R.id.btn_open_file -> {
+                        showList()
+                    }
+                    R.id.btn_open_saved ->{
+                        Log.d("MAIN ACTIVITY", "onClick: ")
+                        val cuboidModel = cuboidPreference.getCuboid()
+                        activityMainBinding.edtLength.setText(cuboidModel.length.toString())
+                        activityMainBinding.edtWidth.setText(cuboidModel.width.toString())
+                        activityMainBinding.edtHeight.setText(cuboidModel.height.toString())
+                    }
                     R.id.btn_save -> {
                         mainViewModel.save(valueLength, valueWidth, valueHeight)
+                        cuboidPreference.setCuboid(mainViewModel.cuboidModel)
                         visible()
                     }
                     R.id.btn_calculate_circumference -> {
@@ -59,9 +76,28 @@ class MainActivity : AppCompatActivity(), View.OnClickListener  {
                         activityMainBinding.tvResult.text = mainViewModel.getVolume().toString()
                         gone()
                     }
+                    R.id.btn_save_file -> {
+                        val fileModel = FileModel("test${System.currentTimeMillis()}", "Length:$valueLength\nWidth:$valueWidth\nHeight:$valueHeight")
+                        FileHelper.writeToFile(fileModel, this)
+                        Toast.makeText(this, "Saving " + fileModel.fileName + " file", Toast.LENGTH_SHORT).show()
+                        gone()
+                    }
                 }
             }
         }
+    }
+
+    private fun showList(){
+        val items = fileList()
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Pilih file yang diinginkan")
+        builder.setItems(items) { dialog, item -> loadData(items[item].toString()) }
+        val alert = builder.create()
+        alert.show()
+    }
+    private fun loadData(title: String) {
+        val fileModel = FileHelper.readFromFile(this, title)
+        Toast.makeText(this, "Loading " + fileModel.fileName + " data", Toast.LENGTH_SHORT).show()
     }
     private fun visible() {
         activityMainBinding.btnCalculateVolume.visibility = View.VISIBLE

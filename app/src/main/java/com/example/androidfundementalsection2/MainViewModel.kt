@@ -1,6 +1,6 @@
 package com.example.androidfundementalsection2
 
-class MainViewModel(private val cuboidModel: CuboidModel) {
+class MainViewModel( val cuboidModel: CuboidModel) {
     fun getCircumference() = cuboidModel.getCircumference()
     fun getSurfaceArea() = cuboidModel.getSurfaceArea()
     fun getVolume() = cuboidModel.getVolume()

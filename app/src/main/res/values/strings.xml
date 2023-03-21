@@ -8,4 +8,7 @@
     <string name="height">Tinggi</string>
     <string name="length">Panjang</string>
     <string name="save">Simpan</string>
+    <string name="save_file">save file</string>
+    <string name="open_file">Open File</string>
+    <string name="open_saved">Open Saved</string>
 </resources>

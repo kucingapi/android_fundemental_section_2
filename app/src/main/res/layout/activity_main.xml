@@ -45,6 +45,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/save" />
+    <Button
+        android:id="@+id/btn_save_file"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/save_file" />
+    <Button
+        android:id="@+id/btn_open_file"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/open_file" />
+    <Button
+        android:id="@+id/btn_open_saved"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/open_saved" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -83,5 +98,4 @@
         android:text="@string/result"
         android:textSize="24sp"
         android:textStyle="bold" />
-
 </LinearLayout>
