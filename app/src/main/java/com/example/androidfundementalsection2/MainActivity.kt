@@ -1,14 +1,22 @@
 package com.example.androidfundementalsection2
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
+import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.ViewModelProvider
 import com.example.androidfundementalsection2.databinding.ActivityMainBinding
 
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 class MainActivity : AppCompatActivity(), View.OnClickListener  {
     private lateinit var activityMainBinding: ActivityMainBinding
     private lateinit var mainViewModel: MainViewModel
@@ -17,6 +25,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener  {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+       val pref = SettingPreferences.getInstance(dataStore)
+       val themeViewModel = ViewModelProvider(this, ViewModelFactory(pref)).get(
+           ThemeViewModel::class.java
+       )
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
 
@@ -28,6 +40,30 @@ class MainActivity : AppCompatActivity(), View.OnClickListener  {
         activityMainBinding.btnCalculateCircumference.setOnClickListener(this)
         activityMainBinding.btnCalculateVolume.setOnClickListener(this)
         activityMainBinding.btnSaveFile.setOnClickListener(this)
+        val switchTheme = activityMainBinding.switchTheme
+        themeViewModel.getThemeSettings().observe(this
+        ) { isDarkModeActive: Boolean ->
+            if (isDarkModeActive) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                switchTheme.isChecked = true
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                switchTheme.isChecked = false
+            }
+        }
+
+        switchTheme.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
+            themeViewModel.saveThemeSetting(isChecked)
+        }
+//        switchTheme.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
+//            if (isChecked) {
+//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+//                switchTheme.isChecked = true
+//            } else {
+//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+//                switchTheme.isChecked = false
+//            }
+//        }
     }
 
     override fun onClick(v: View) {
@@ -110,4 +146,5 @@ class MainActivity : AppCompatActivity(), View.OnClickListener  {
         activityMainBinding.btnCalculateCircumference.visibility = View.GONE
         activityMainBinding.btnCalculateSurfaceArea.visibility = View.GONE
         activityMainBinding.btnSave.visibility = View.VISIBLE
-    }}
+    }
+}
