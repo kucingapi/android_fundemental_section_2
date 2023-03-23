@@ -13,17 +13,23 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.androidfundementalsection2.database.CuboidEntity
 import com.example.androidfundementalsection2.databinding.ActivityMainBinding
+import com.example.androidfundementalsection2.viewmodel.CuboidViewModel
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 class MainActivity : AppCompatActivity(), View.OnClickListener  {
     private lateinit var activityMainBinding: ActivityMainBinding
     private lateinit var mainViewModel: MainViewModel
     private lateinit var cuboidPreference: CuboidPreference
+    private lateinit var cuboidViewModel: CuboidViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        cuboidViewModel = CuboidViewModel(application)
 
        val pref = SettingPreferences.getInstance(dataStore)
        val themeViewModel = ViewModelProvider(this, ViewModelFactory(pref)).get(
@@ -55,15 +61,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener  {
         switchTheme.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             themeViewModel.saveThemeSetting(isChecked)
         }
-//        switchTheme.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-//            if (isChecked) {
-//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-//                switchTheme.isChecked = true
-//            } else {
-//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-//                switchTheme.isChecked = false
-//            }
-//        }
     }
 
     override fun onClick(v: View) {
@@ -98,6 +95,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener  {
                     R.id.btn_save -> {
                         mainViewModel.save(valueLength, valueWidth, valueHeight)
                         cuboidPreference.setCuboid(mainViewModel.cuboidModel)
+                        val cuboidEntity = CuboidEntity(
+                            width = valueWidth,
+                            height = valueHeight,
+                            length = valueLength,
+                        )
+                        cuboidViewModel.insert(cuboidEntity)
                         visible()
                     }
                     R.id.btn_calculate_circumference -> {
@@ -116,6 +119,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener  {
                         val fileModel = FileModel("test${System.currentTimeMillis()}", "Length:$valueLength\nWidth:$valueWidth\nHeight:$valueHeight")
                         FileHelper.writeToFile(fileModel, this)
                         Toast.makeText(this, "Saving " + fileModel.fileName + " file", Toast.LENGTH_SHORT).show()
+                        val cuboidLiveData = cuboidViewModel.getAllCuboid()
+                        cuboidLiveData.observe(this){
+                            Log.d("List Cuboid", "onClick: $it")
+                        }
                         gone()
                     }
                 }
